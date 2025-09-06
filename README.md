@@ -1,4 +1,4 @@
-[README.md](https://github.com/user-attachments/files/22187482/README.md)
+[README (1).md](https://github.com/user-attachments/files/22187553/README.1.md)
 # Breadtalk POS – CLI (MySQL)
 
 CLI sederhana untuk mengelola produk, transaksi, dan laporan ala kasir (mirip struk BreadTalk). Dibuat dengan Python + MySQL. Cocok untuk belajar dan dipakai internal skala kecil.
@@ -27,7 +27,7 @@ CLI sederhana untuk mengelola produk, transaksi, dan laporan ala kasir (mirip st
 
 ### 1) Clone & masuk folder
 ```bash
-git clone https://github.com/<username>/breadtalk-pos.git
+git clone https://github.com/ganmrizqan/breadtalk-pos.git
 cd breadtalk-pos
 ```
 
