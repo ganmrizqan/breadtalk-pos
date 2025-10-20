@@ -1,4 +1,4 @@
-﻿# python
+﻿# Python
 __pycache__/
 *.py[cod]
 *.pyo
@@ -13,6 +13,7 @@ venv/
 # Secret & env vars
 .env
 .env.*
+!.env.example
 
 # Build / packaging
 dist/
@@ -27,3 +28,13 @@ logs/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Text files
+readme-first.txt
+list-fitur.txt
+
+# Database
+Dump20251008.sql
+
+# Image
+Struk.webp

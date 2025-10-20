@@ -1,8 +1,12 @@
+import logging
 import datetime as dt
 from decimal import Decimal
 from typing import List, Tuple, Optional
 from tabulate import tabulate
 from utils.helpers import input_nonempty, input_decimal, input_int
+from utils.logging_tools import log_exceptions
+
+logger = logging.getLogger(__name__)
 
 SQL_LIST_CASHIER = "" \
 "SELECT cashier_id, employee_code, full_name " \
@@ -20,8 +24,8 @@ SQL_GET_PRODUCT_BY_SKU = "" \
 "WHERE sku = %s AND is_active = 1;"
 
 SQL_INSERT_TX_HEADER = "" \
-"INSERT INTO transactions (receipt_no, store_id, cashier_id, txn_datetime, subtotal, discount_amount, tax_amount, total_amount, customer_note) " \
-"VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
+"INSERT INTO transactions (receipt_no, store_id, cashier_id, txn_datetime, subtotal, discount_amount, tax_amount, total_amount, customer_note, payment_method_id) " \
+"VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
 
 SQL_INSERT_TX_ITEM = "" \
 "INSERT INTO transaction_items (transaction_id, product_id, quantity, unit_price, line_discount, line_total) " \
@@ -54,7 +58,9 @@ def fetch_product_by_sku(conn, sku: str):
         cur.execute(SQL_GET_PRODUCT_BY_SKU, (sku,))
         return cur.fetchone()
 
+@log_exceptions("Create transaction error")
 def create_transaction(conn):
+    logger.info("Create transaction started")
     print("=== Buat Transaksi Baru ===")
     show_cashiers(conn)
     cashier_id = input_int("Pilih cashier ID: ", min_value=1)
@@ -92,6 +98,8 @@ def create_transaction(conn):
     tax = (subtotal * Decimal("0.10")).quantize(Decimal("0.01"))
     discount_header = Decimal("0.00")
     total = subtotal - discount_header + tax
+    logger.debug("Tx computed subtotal=%s discount=%s tax=%s total=%s items=%d",
+                 subtotal, discount_header, tax, total, len(items))
 
     show_payment_methods(conn)
     pay_method_id = input_int("Pilih payment method ID: ", min_value=1)
@@ -115,6 +123,7 @@ def create_transaction(conn):
                     tax,
                     total,
                     note,
+                    pay_method_id,
                 ),
             )
             cur.execute(SQL_GET_LAST_INSERT_ID)
@@ -146,6 +155,7 @@ def create_transaction(conn):
                 ),
             )
         conn.commit()
+        logger.info("Transaction commited tx_id=%s total=%s items=%s", tx_id, total, len(items))
         print("Transaksi berhasil disimpan.")
         print(f"Receipt No: {receipt_no}")
         print(f"Subtotal: {subtotal}")
@@ -154,4 +164,5 @@ def create_transaction(conn):
     
     except Exception as e:
         conn.rollback()
+        logger.exception("Transaction failed; rolling back")
         print("Gagal menyimpan transaksi:", e)
